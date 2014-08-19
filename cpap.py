@@ -40,7 +40,7 @@ def main(input_file, bin_size, output_file):
             logging.warning('Found event with no pressure: %s' % str(row))
 
     data_list = []
-    field_list = ['Pressure', 'Hours']
+    field_list = ['Pressure', 'Hours', 'Obstructive', 'ClearAirway', 'Hypopnea', 'RERA', 'FlowLimit', 'PressurePulse', 'VSnore', 'VSnore2' ]
     for key, value in events_per_pressures.iteritems():
         d = {'Pressure': key, 'Hours': '%.3f' % (value['duration'].total_seconds()/3600.)}
         for event, count in value['event_counts'].iteritems():
