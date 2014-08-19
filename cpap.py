@@ -40,9 +40,9 @@ def main(input_file, bin_size, output_file):
             logging.warning('Found event with no pressure: %s' % str(row))
 
     data_list = []
-    field_list = ['Pressure', 'Duration']
+    field_list = ['Pressure', 'Hours']
     for key, value in events_per_pressures.iteritems():
-        d = {'Pressure': key, 'Duration': value['duration']}
+        d = {'Pressure': key, 'Hours': '%.3f' % (value['duration'].total_seconds()/3600.)}
         for event, count in value['event_counts'].iteritems():
             d[event] = count
             if not event in field_list:
@@ -53,7 +53,7 @@ def main(input_file, bin_size, output_file):
         f = open(output_file, 'w')
     else:
         f = sys.stdout
-    dw = csv.DictWriter(f, field_list)
+    dw = csv.DictWriter(f, field_list, restval='0')
     dw.writeheader()
     for row in data_list:
         dw.writerow(row)
