@@ -6,9 +6,10 @@ import logging
 from collections import defaultdict, Counter
 from decimal import Decimal
 import datetime
+import sys
 
 
-def main(input_file, bin_size):
+def main(input_file, bin_size, output_file):
     data = []
     with open(input_file) as f:
         reader = csv.DictReader(f)
@@ -38,8 +39,26 @@ def main(input_file, bin_size):
         else:
             logging.warning('Found event with no pressure: %s' % str(row))
 
+    data_list = []
+    field_list = ['Pressure', 'Duration']
     for key, value in events_per_pressures.iteritems():
-        print key, value['duration'].total_seconds()/60., value['event_counts']
+        d = {'Pressure': key, 'Duration': value['duration']}
+        for event, count in value['event_counts'].iteritems():
+            d[event] = count
+            if not event in field_list:
+                field_list.append(event)
+        data_list.append(d)
+    data_list.sort(key=lambda d: d['Pressure'])
+    if output_file:
+        f = open(output_file, 'w')
+    else:
+        f = sys.stdout
+    dw = csv.DictWriter(f, field_list)
+    dw.writeheader()
+    for row in data_list:
+        dw.writerow(row)
+    if output_file:
+        f.close()
 
 
 def bin_pressure(pressure_string, bin_size):
@@ -51,7 +70,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='From an input cpap log, find how many events of what type happened at which pressure ranges.')
     parser.add_argument(dest='input_file')
     parser.add_argument('-b', '--binsize', dest='bin_size', default='.5', help='Bin size for pressures. Bin names are lower edge of range.')
+    parser.add_argument('-o', '--outputfile', dest='output_file', help='Output data to file. If not specified, output to stdout')
     args = parser.parse_args()
-    main(args.input_file, Decimal(args.bin_size))
+    main(args.input_file, Decimal(args.bin_size), args.output_file)
 
 
